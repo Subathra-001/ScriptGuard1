@@ -35,12 +35,16 @@ export const store: StoreState = {
 let persistQueue: Promise<void> = Promise.resolve();
 
 export function persistStore(): Promise<void> {
-  persistQueue = persistQueue.then(async () => {
+  const operation = persistQueue.then(async () => {
     mkdirSync(dataDirectory, { recursive: true });
     const tempPath = `${storeFilePath}.tmp`;
     await writeFile(tempPath, JSON.stringify(store));
     await rename(tempPath, storeFilePath);
   });
 
-  return persistQueue;
+  persistQueue = operation.catch((error) => {
+    console.error("Persist operation failed:", error);
+  });
+
+  return operation;
 }
