@@ -75,7 +75,7 @@ export async function updateIncidentStatus(
   incident.updatedAt = new Date().toISOString();
   if (status === "Approved") {
     incident.approvedAt = incident.updatedAt;
-    incident.recoveryState = "ExecutingFix";
+    executeFix(incident);
   }
   if (status === "Resolved") {
     incident.resolvedAt = incident.updatedAt;
@@ -86,7 +86,7 @@ export async function updateIncidentStatus(
     incidentId: incident.id,
     action: "incident.status_updated",
     actor,
-    details: `Incident moved to ${status}.`,
+    details: `Incident moved to ${incident.status}.`,
   });
 
   await persistStore();
