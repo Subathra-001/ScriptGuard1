@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     scriptName: body.scriptName,
     errorOutput: body.errorOutput,
     severity,
-    actor: "api",
+    actor: request.headers.get("x-actor") ?? "api",
   });
 
   return NextResponse.json({ incident }, { status: 201 });

@@ -8,6 +8,10 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+function getActor(request: NextRequest): string {
+  return request.headers.get("x-actor") ?? "api";
+}
+
 export async function GET(request: NextRequest, context: RouteContext) {
   const unauthorized = authenticateApiKey(request);
   if (unauthorized) return unauthorized;
@@ -33,14 +37,16 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
+  const actor = getActor(request);
+
   if (body.action === "approve") {
-    const incident = approveAndExecuteFix(id, "approver");
+    const incident = await approveAndExecuteFix(id, actor);
     if (!incident) return NextResponse.json({ error: "Incident not found" }, { status: 404 });
     return NextResponse.json({ incident });
   }
 
   if (body.status && ["Investigating", "Approved", "Resolved"].includes(body.status)) {
-    const incident = updateIncidentStatus(id, body.status as IncidentStatus, "api");
+    const incident = await updateIncidentStatus(id, body.status as IncidentStatus, actor);
     if (!incident) return NextResponse.json({ error: "Incident not found" }, { status: 404 });
     return NextResponse.json({ incident });
   }

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-import { store } from "@/lib/store";
+import { persistStore, store } from "@/lib/store";
 import type { Incident, IncidentSeverity, IncidentStatus } from "@/lib/types";
 import { analyzeFailure } from "@/lib/services/analysisService";
 import { logAuditEvent } from "@/lib/services/auditService";
@@ -40,8 +40,9 @@ export async function createIncident(input: CreateIncidentInput): Promise<Incide
   }
 
   store.incidents.unshift(incident);
+  await persistStore();
 
-  logAuditEvent({
+  await logAuditEvent({
     incidentId: incident.id,
     action: "incident.created",
     actor: input.actor ?? "system",
@@ -62,7 +63,11 @@ export function getIncidentById(id: string): Incident | undefined {
   return store.incidents.find((incident) => incident.id === id);
 }
 
-export function updateIncidentStatus(id: string, status: IncidentStatus, actor: string): Incident | undefined {
+export async function updateIncidentStatus(
+  id: string,
+  status: IncidentStatus,
+  actor: string,
+): Promise<Incident | undefined> {
   const incident = getIncidentById(id);
   if (!incident) return undefined;
 
@@ -77,17 +82,18 @@ export function updateIncidentStatus(id: string, status: IncidentStatus, actor: 
     incident.recoveryState = "Completed";
   }
 
-  logAuditEvent({
+  await logAuditEvent({
     incidentId: incident.id,
     action: "incident.status_updated",
     actor,
     details: `Incident moved to ${status}.`,
   });
 
+  await persistStore();
   return incident;
 }
 
-export function approveAndExecuteFix(id: string, actor: string): Incident | undefined {
+export async function approveAndExecuteFix(id: string, actor: string): Promise<Incident | undefined> {
   const incident = getIncidentById(id);
   if (!incident) return undefined;
 
@@ -95,7 +101,7 @@ export function approveAndExecuteFix(id: string, actor: string): Incident | unde
   incident.approvedAt = new Date().toISOString();
   incident.updatedAt = incident.approvedAt;
 
-  logAuditEvent({
+  await logAuditEvent({
     incidentId: incident.id,
     action: "incident.approved",
     actor,
@@ -104,13 +110,14 @@ export function approveAndExecuteFix(id: string, actor: string): Incident | unde
 
   executeFix(incident);
 
-  logAuditEvent({
+  await logAuditEvent({
     incidentId: incident.id,
     action: "incident.resolved",
     actor,
     details: "Approved fix executed successfully.",
   });
 
+  await persistStore();
   return incident;
 }
 

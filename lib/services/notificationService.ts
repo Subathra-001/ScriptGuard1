@@ -4,11 +4,19 @@ import type { Incident } from "@/lib/types";
 async function sendWebhook(url: string | undefined, payload: object): Promise<void> {
   if (!url || !config.notificationsEnabled) return;
 
-  await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error(`Notification webhook returned ${response.status}: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Notification webhook delivery failed:", error);
+  }
 }
 
 export async function sendIncidentAlert(incident: Incident): Promise<void> {

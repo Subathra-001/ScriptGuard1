@@ -39,7 +39,7 @@ Open `http://localhost:3000`.
 
 ## Environment Variables
 
-Create `.env.local`:
+Create `.env.local` (API key is required):
 
 ```bash
 SCRIPTGUARD_API_KEY=replace-with-strong-key
