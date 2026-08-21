@@ -52,6 +52,8 @@ ENABLE_NOTIFICATIONS=true
 
 ## Troubleshooting
 
+- `sh: 1: next: not found`
+  - Install dependencies first with `npm install` (or `npm ci`).
 - `Server misconfigured: SCRIPTGUARD_API_KEY is required`
   - Ensure `.env.local` exists and `SCRIPTGUARD_API_KEY` is set, then restart `npm run dev`.
 - `Unauthorized`
