@@ -32,6 +32,8 @@ ScriptGuard is an AI-powered self-healing automation platform built with **Next.
 
 ```bash
 npm install
+cp .env.example .env.local
+# update SCRIPTGUARD_API_KEY in .env.local
 npm run dev
 ```
 
@@ -47,6 +49,13 @@ TEAMS_WEBHOOK_URL=https://example.webhook.office.com/...
 OUTLOOK_WEBHOOK_URL=https://example.outlook.office.com/...
 ENABLE_NOTIFICATIONS=true
 ```
+
+## Troubleshooting
+
+- `Server misconfigured: SCRIPTGUARD_API_KEY is required`
+  - Ensure `.env.local` exists and `SCRIPTGUARD_API_KEY` is set, then restart `npm run dev`.
+- `Unauthorized`
+  - Pass `x-api-key` (or an `Authorization` header) with the same value as `SCRIPTGUARD_API_KEY`.
 
 ## Usage Guide
 
